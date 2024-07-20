@@ -1,0 +1,51 @@
+<?php
+
+use PHPUnit\Framework\TestCase;
+use CodeCorner\Validation\Validation;
+
+class ValidationTest extends TestCase
+{
+    public function testValidationWithRequiredField()
+    {
+        $rules = [
+            'username' => 'required|numeric|min:2|max:10',
+            'email' => 'required|email',
+            'nullable'  => 'nullable',
+            'name'  => 'required|min:1|max:10',
+            'gender'  => 'required|in_array:2,3'
+        ];
+
+        $validData = [
+            'username' => '112',
+            'nullable' => null,
+            'name'      => 'ghgj',
+            'gender'      => 3,
+            'email' => 'john.doe@example.com',
+        ];
+
+        Validation::validate($rules, $validData);
+
+        print_r(Validation::getErrors());
+        die;
+        // Assert that there are no errors after validation
+        $this->assertEquals(true, Validation::getErrors());
+    }
+
+    public function testValidationWithInvalidData()
+    {
+        $rules = [
+            'phone' => 'required|phone',
+            'phone_code'   => 'required'
+        ];
+
+        $invalidData = [
+            'phone' => '8447441246',
+            'phone_code' => 'IN',
+        ];
+
+        Validation::validate($rules, $invalidData);
+
+        // Assert that there are errors after validation
+        $this->assertEquals(true, Validation::getErrors());
+    }
+}
