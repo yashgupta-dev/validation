@@ -1,6 +1,6 @@
 {
     "name": "code-corner/validation",
-    "description": "use to validate your form fields easliy with validation library",
+    "description": "The Validation Library is a robust PHP toolkit designed to streamline the validation of form fields upon submission. It offers a variety of methods that cater to different data types and validation criteria, ensuring that your application receives accurate and secure input data.",
     "type": "library",
     "license": "MIT",
     "autoload": {
