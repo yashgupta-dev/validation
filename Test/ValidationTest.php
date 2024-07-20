@@ -11,14 +11,14 @@ class ValidationTest extends TestCase
             'username' => 'required|numeric|min:2|max:10',
             'email' => 'required|email',
             'nullable'  => 'nullable',
-            'name'  => 'required|min:1|max:10',
+            'name'  => 'required',
             'gender'  => 'required|in_array:2,3'
         ];
 
         $validData = [
             'username' => '112',
             'nullable' => null,
-            'name'      => 'ghgj',
+            'name'      => '',
             'gender'      => 3,
             'email' => 'john.doe@example.com',
         ];

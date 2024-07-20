@@ -154,7 +154,7 @@ class Validation
 
                     if (!$valid) {
                         if (empty(self::$validationError[$field])) {
-                            self::$validationError[$field] = RequiredValidator::validate($msgs, $field, $ruleName);
+                            self::$validationError[$field] = RequiredValidator::messageCreate($msgs, $field, $ruleName);
                         }
                     }
 
@@ -170,7 +170,7 @@ class Validation
                     if (!$valid) {
 
                         if (empty(self::$validationError[$field])) {
-                            self::$validationError[$field] = RequiredArrayValidator::validate($msgs, $field, $ruleName);
+                            self::$validationError[$field] = RequiredArrayValidator::messageCreate($msgs, $field, $ruleName);
                         }
                     }
                     break;
