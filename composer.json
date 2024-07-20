@@ -13,7 +13,7 @@
             "name": "yash gupta"
         }
     ],
-    "minimum-stability": "stable",
+    "minimum-stability": "alpha",
     "require": {
         "giggsey/locale": "^1.7|^2.0",
         "php": ">=7.4.2",
