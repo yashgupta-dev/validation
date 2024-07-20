@@ -5,19 +5,20 @@ namespace CodeCorner\Validation;
 use CodeCorner\Validation\config\config;
 use CodeCorner\Validation\Validators\MaxValidator;
 use CodeCorner\Validation\Validators\MinValidator;
+use CodeCorner\Validation\Validators\UrlValidator;
 use CodeCorner\Validation\Validators\FileValidator;
+use CodeCorner\Validation\Validators\RegxValidator;
 use CodeCorner\Validation\Validators\EmailValidator;
 use CodeCorner\Validation\Validators\PhoneValidator;
 use CodeCorner\Validation\Validators\EqualsValidator;
 use CodeCorner\Validation\Validators\StringValidator;
 use CodeCorner\Validation\Validators\DecimalValidator;
 use CodeCorner\Validation\Validators\InArrayValidator;
+use CodeCorner\Validation\Validators\DatabaseValidator;
+use CodeCorner\Validation\Validators\NullableValidator;
 use CodeCorner\Validation\Validators\RequiredValidator;
 use CodeCorner\Validation\Validators\IsNumericValidator;
-use CodeCorner\Validation\Validators\NullableValidator;
-use CodeCorner\Validation\Validators\RegxValidator;
 use CodeCorner\Validation\Validators\RequiredArrayValidator;
-use CodeCorner\Validation\Validators\UrlValidator;
 
 /**
  * Validation
@@ -41,6 +42,30 @@ class Validation
 
     public static $imageError = array();
 
+    private static $dbObject;
+
+    private static $sql = '';
+
+    /**
+     * dbConfigure
+     *
+     * @param  mixed $dbObject
+     * @return void
+     */
+    public static function dbConfigure($dbObject)
+    {
+        self::$dbObject = $dbObject;
+    }
+
+    /**
+     * getDbObject
+     *
+     * @return object
+     */
+    public static function getDbObject()
+    {
+        return self::$dbObject;
+    }
     /**
      * validate
      *
@@ -265,29 +290,21 @@ class Validation
                         $vals = trim($data[$field]);
                         $data[$field] = preg_replace('/\s+/', ' ', $vals);
 
-                        $sql = '';
-                        $sql .= 'SELECT count(' . $column . ')  as count';
-                        $sql .= ' FROM ' . $table;
-                        $sql .= ' WHERE ' . $column . ' = "' . $data[$field] . '"';
+                        self::$sql = '';
+                        self::$sql .= 'SELECT count(' . $column . ')  as count';
+                        self::$sql .= ' FROM ' . $table;
+                        self::$sql .= ' WHERE ' . $column . ' = "' . $data[$field] . '"';
                     }
 
-                    try {
-                        if (!empty($data[$field])) {
+                    $valid = DatabaseValidator::validate_UNIQUE($data, $field, $ruleValue, $ruleName, self::$sql, self::getDbObject());
 
-                            $valid = config::SQLQueries($sql,'unique');
-                            // !DB::get()->get->query($sql)->fetch_assoc()['count'];
-                        }
+                    if (!$valid) {
 
-                        if (!$valid) {
-                            $fieldMsg = isset($msgs[$field]) ? $msgs[$field] : $field;
-                            if (empty(self::$validationError[$field])) {
-                                self::$validationError[$field] = $fieldMsg . " field must be " . $ruleName;
-                            }
+                        if (empty(self::$validationError[$field])) {
+                            self::$validationError[$field] = DatabaseValidator::messageCreate_UNIQUE($msgs, $field, $ruleValue, $ruleName);
                         }
-                    } catch (\Exception $e) {
-                        $valid = false;
-                        $exceptionMsg = $e->getMessage();
                     }
+
                     break;
 
                 case 'not_in':
@@ -301,61 +318,48 @@ class Validation
                             $column = explode(',', $column)[0] ?? $column;
                         }
 
-                        $sql = '';
-                        $sql .= 'SELECT count(' . $column . ')  as count';
-                        $sql .= ' FROM ' . $table;
-                        $sql .= ' WHERE ' . $column . ' = "' . $data[$field] . '"';
+                        self::$sql = '';
+                        self::$sql .= 'SELECT count(' . $column . ')  as count';
+                        self::$sql .= ' FROM ' . $table;
+                        self::$sql .= ' WHERE ' . $column . ' = "' . $data[$field] . '"';
                         if (!empty($not) && !empty($notValue)) {
-                            $sql .= ' AND `' . $not . '` != "' . $notValue . '"';
+                            self::$sql .= ' AND `' . $not . '` != "' . $notValue . '"';
                         }
                     }
 
-                    try {
-                        if (!empty($data[$field])) {
-                            $valid = config::SQLQueries($sql,'not_in');
-                            //!DB::get()->get->query($sql)->fetch_assoc()['count'];
-                        }
+                    $valid = DatabaseValidator::validate_NOTIN($data, $field, $ruleValue, $ruleName, self::$sql, self::getDbObject());
 
-                        if (!$valid) {
-                            $fieldMsg = isset($msgs[$field]) ? $msgs[$field] : $field;
-                            if (empty(self::$validationError[$field])) {
-                                self::$validationError[$field] = $fieldMsg . " field must be " . $ruleName;
-                            }
+                    if (!$valid) {
+
+                        if (empty(self::$validationError[$field])) {
+                            self::$validationError[$field] = DatabaseValidator::messageCreate_NOTIN($msgs, $field, $ruleValue, $ruleName);
                         }
-                    } catch (\Exception $e) {
-                        $valid = false;
-                        $exceptionMsg = $e->getMessage();
                     }
+
                     break;
 
                 case 'in':
+
                     if (!empty($data[$field])) {
                         $keys = !empty($data[$field]) ? $data[$field] : 0;
                         if (is_array($keys)) {
                             $keys = implode(',', $keys);
                         }
-                        $sql = '';
-                        $sql .= 'SELECT count(' . $column . ')  as count';
-                        $sql .= ' FROM ' . $table;
-                        $sql .= ' WHERE ' . $column . ' IN ("' . $keys . '")';
+                        self::$sql = '';
+                        self::$sql .= 'SELECT count(' . $column . ')  as count';
+                        self::$sql .= ' FROM ' . $table;
+                        self::$sql .= ' WHERE ' . $column . ' IN ("' . $keys . '")';
                     }
 
-                    try {
-                        if (!empty($data[$field])) {
-                            $valid = config::SQLQueries($sql,'in');
-                            // DB::get()->get->query($sql)->fetch_assoc()['count'];
-                        }
+                    $valid = DatabaseValidator::validate_IN($data, $field, $ruleValue, $ruleName, self::$sql, self::getDbObject());
 
-                        if (!$valid) {
-                            $fieldMsg = isset($msgs[$field]) ? $msgs[$field] : $field;
-                            if (empty(self::$validationError[$field])) {
-                                self::$validationError[$field] = $fieldMsg . " not exists.";
-                            }
+                    if (!$valid) {
+
+                        if (empty(self::$validationError[$field])) {
+                            self::$validationError[$field] = DatabaseValidator::messageCreate($msgs, $field, $ruleValue, $ruleName);
                         }
-                    } catch (\Exception $e) {
-                        $valid = false;
-                        $exceptionMsg = $e->getMessage();
                     }
+
                     break;
 
                 case 'assign':
@@ -364,31 +368,21 @@ class Validation
                         if (is_array($keys)) {
                             $keys = implode(',', $keys);
                         }
-                        $sql = '';
-                        $sql .= 'SELECT count(' . $column . ')  as count';
-                        $sql .= ' FROM ' . $table;
-                        $sql .= ' WHERE ' . $column . ' IN ("' . $keys . '")';
+                        self::$sql = '';
+                        self::$sql .= 'SELECT count(' . $column . ')  as count';
+                        self::$sql .= ' FROM ' . $table;
+                        self::$sql .= ' WHERE ' . $column . ' IN ("' . $keys . '")';
                     }
 
-                    try {
-                        if (!empty($data[$field])) {
-                            $valid = config::SQLQueries($sql,'assign');                            
-                            // DB::get()->get->query($sql)->fetch_assoc()['count'];
+                    $valid = DatabaseValidator::validate_ASSIGN($data, $field, $ruleValue, $ruleName, self::$sql, self::getDbObject());
+
+                    if (!$valid) {
+
+                        if (empty(self::$validationError[$field])) {
+                            self::$validationError[$field] = DatabaseValidator::messageCreate_ASSIGN($msgs, $field, $ruleValue, $ruleName);
                         }
-                        if ($valid) {
-                            $valid = false;
-                            $fieldMsg = isset($msgs[$field]) ? $msgs[$field] : $field;
-
-                            if (empty(self::$validationError[$field])) {
-
-                                self::$validationError[$field] = $fieldMsg . " already in used";
-                            }
-                        }
-                    } catch (\Exception $e) {
-
-                        $valid = false;
-                        $exceptionMsg = $e->getMessage();
                     }
+
                     break;
 
                 case 'rgex':

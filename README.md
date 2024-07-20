@@ -102,6 +102,43 @@ composer require codecorners/validation
 
    This will output an array of validation errors encountered during the validation process.
 
+6. **Using Database level validation**
+
+   - add your DB object in the config.php file.
+
+   ```php
+      Validation::dbConfigure(self::$pdo);
+   ```
+
+   then you will use database level validation
+
+   ```php
+   <?php
+
+   require_once 'vendor/autoload.php';
+
+      use CodeCorner\Validation\Validation;
+
+      Validation::validate([
+         'name'  => 'required|min:3',
+         'email' => 'required|unique:`tablename`.`fieldname`',
+         'phone' => 'phone|not_in:`tablename`.`fieldname`,`fieldname`-`value`',
+         'role'  => 'in:`tablename`.`fieldname',
+         'username' => 'assign:`tablename`.`fieldname`',
+         
+      ], [
+         'name' => 'John Doe',
+         'email' => 'john@example.com',
+         'phone' => '+1234567890',
+         'role' => 'admin',
+         'username' => 'johndoe',         
+      ]);
+
+      $errors = Validation::getErrors();
+      print_r($errors);
+      ```
+
+
 ## Example
 
 Here's a complete example of how you might use this library:
