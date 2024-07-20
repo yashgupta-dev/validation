@@ -2,6 +2,7 @@
 
 namespace CodeCorner\Validation;
 
+use CodeCorner\Validation\config\config;
 use CodeCorner\Validation\Validators\MaxValidator;
 use CodeCorner\Validation\Validators\MinValidator;
 use CodeCorner\Validation\Validators\FileValidator;
@@ -273,7 +274,8 @@ class Validation
                     try {
                         if (!empty($data[$field])) {
 
-                            $valid = !DB::get()->get->query($sql)->fetch_assoc()['count'];
+                            $valid = config::SQLQueries($sql,'unique');
+                            // !DB::get()->get->query($sql)->fetch_assoc()['count'];
                         }
 
                         if (!$valid) {
@@ -310,7 +312,8 @@ class Validation
 
                     try {
                         if (!empty($data[$field])) {
-                            $valid = !DB::get()->get->query($sql)->fetch_assoc()['count'];
+                            $valid = config::SQLQueries($sql,'not_in');
+                            //!DB::get()->get->query($sql)->fetch_assoc()['count'];
                         }
 
                         if (!$valid) {
@@ -339,7 +342,8 @@ class Validation
 
                     try {
                         if (!empty($data[$field])) {
-                            $valid = DB::get()->get->query($sql)->fetch_assoc()['count'];
+                            $valid = config::SQLQueries($sql,'in');
+                            // DB::get()->get->query($sql)->fetch_assoc()['count'];
                         }
 
                         if (!$valid) {
@@ -368,7 +372,8 @@ class Validation
 
                     try {
                         if (!empty($data[$field])) {
-                            $valid = DB::get()->get->query($sql)->fetch_assoc()['count'];
+                            $valid = config::SQLQueries($sql,'assign');                            
+                            // DB::get()->get->query($sql)->fetch_assoc()['count'];
                         }
                         if ($valid) {
                             $valid = false;

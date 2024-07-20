@@ -24,9 +24,6 @@ class ValidationTest extends TestCase
         ];
 
         Validation::validate($rules, $validData);
-
-        print_r(Validation::getErrors());
-        die;
         // Assert that there are no errors after validation
         $this->assertEquals(true, Validation::getErrors());
     }
