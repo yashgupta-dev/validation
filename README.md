@@ -78,7 +78,7 @@ composer require codecorners/validation
    - `numeric`: The field must be numeric.
    - `in_array:val1,val2,...`: The field must be one of the specified values.
    - `array_required`: The field must be an array and not empty.
-   - `file`: The field must be a file upload.
+   - `file`: The field must be a file upload. // 'size.5000000&type.png,jpeg&name.jpeg,png'
    - `min:value`: The field must be at least `value` characters long (for strings) or numeric value.
    - `max:value`: The field must be at most `value` characters long (for strings) or numeric value.
    - `nullable`: Allows the field to be null or empty.
